@@ -2,6 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Bar, Pie, Line } from "react-chartjs-2";
+import { useRouter } from "next/navigation";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -41,6 +42,12 @@ const mockData = {
 };
 
 export default function DetailedDashboard() {
+  const router = useRouter();
+
+  const handleOptimizeClick = () => {
+    router.push("/optimize");
+  };
+
   const barData = {
     labels: [
       "Annual Revenue",
@@ -111,54 +118,73 @@ export default function DetailedDashboard() {
   };
 
   return (
-    <div className="p-6 bg-background min-h-screen">
-      <h1 className="text-3xl font-semibold mb-6">Detailed Financial Dashboard</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Bar Chart */}
-        <Card className="p-6">
-          <h2 className="text-xl font-medium mb-4">Financial Metrics</h2>
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
+        Detailed Financial Dashboard
+      </h1>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Financial Metrics Chart */}
+        <Card className="p-6 lg:col-span-2 shadow-lg">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">
+            Financial Metrics Overview
+          </h2>
           <Bar data={barData} options={{ responsive: true }} />
         </Card>
 
         {/* Pie Chart */}
-        <Card className="p-6 max-w-2xl">
-          <h2 className="text-xl font-medium mb-4">Profit Distribution</h2>
+        <Card className="p-6 shadow-lg">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">
+            Profit Distribution
+          </h2>
           <Pie data={pieData} options={{ responsive: true }} />
         </Card>
 
-        {/* Line Chart */}
-        <Card className="p-6 lg:col-span-2 max-w-4xl">
-          <h2 className="text-xl font-medium mb-4">Revenue vs. Expenses Trend</h2>
+        {/* Revenue vs. Expenses Trend */}
+        <Card className="p-6 lg:col-span-3 shadow-lg">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">
+            Revenue vs. Expenses Trend
+          </h2>
           <Line data={lineData} options={{ responsive: true }} />
         </Card>
+      </div>
 
-        {/* Key Insights */}
-        <Card className="p-6 lg:col-span-2">
-          <h2 className="text-xl font-medium mb-4">Key Insights</h2>
-          <ul className="list-disc list-inside space-y-2">
-            <li>
-              <strong>Annual Revenue:</strong> ${mockData.annualRevenue.toLocaleString()}
-            </li>
-            <li>
-              <strong>Operating Expenses:</strong> ${mockData.operatingExpenses.toLocaleString()}
-            </li>
-            <li>
-              <strong>Net Income:</strong> ${mockData.netIncome.toLocaleString()}
-            </li>
-            <li>
-              <strong>Total Assets:</strong> ${mockData.totalAssets.toLocaleString()}
-            </li>
-            <li>
-              <strong>Total Liabilities:</strong> ${mockData.totalLiabilities.toLocaleString()}
-            </li>
-            <li>
-              <strong>Cash Flow from Operations:</strong> ${mockData.cashFlow.toLocaleString()}
-            </li>
-            <li>
-              <strong>Capital Expenditure:</strong> ${mockData.capitalExpenditure.toLocaleString()}
-            </li>
-          </ul>
-        </Card>
+      {/* Key Insights Section */}
+      <Card className="p-6 mt-8 shadow-lg">
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">Key Insights</h2>
+        <ul className="list-disc list-inside space-y-2 text-gray-600">
+          <li>
+            <strong>Annual Revenue:</strong> ${mockData.annualRevenue.toLocaleString()}
+          </li>
+          <li>
+            <strong>Operating Expenses:</strong> ${mockData.operatingExpenses.toLocaleString()}
+          </li>
+          <li>
+            <strong>Net Income:</strong> ${mockData.netIncome.toLocaleString()}
+          </li>
+          <li>
+            <strong>Total Assets:</strong> ${mockData.totalAssets.toLocaleString()}
+          </li>
+          <li>
+            <strong>Total Liabilities:</strong> ${mockData.totalLiabilities.toLocaleString()}
+          </li>
+          <li>
+            <strong>Cash Flow from Operations:</strong> ${mockData.cashFlow.toLocaleString()}
+          </li>
+          <li>
+            <strong>Capital Expenditure:</strong> ${mockData.capitalExpenditure.toLocaleString()}
+          </li>
+        </ul>
+      </Card>
+
+      {/* Optimize Button */}
+      <div className="flex justify-center mt-8">
+        <button
+          onClick={handleOptimizeClick}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-all"
+        >
+          Optimize
+        </button>
       </div>
     </div>
   );
