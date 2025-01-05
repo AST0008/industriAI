@@ -60,21 +60,21 @@ export async function POST(request: Request) {
     console.log('Flask result:', flaskResult);
 
     // Store data in Supabase
-    const { data: supabaseData, error: supabaseError } = await supabase
-    .from('financial_data')
+    // const { data: supabaseData, error: supabaseError } = await supabase
+    // .from('financial_data')
     
-          .insert([
-        {
-          user_input: data,
-          processed_data: flaskResult,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
+    //       .insert([
+    //     {
+    //       user_input: data,
+    //       processed_data: flaskResult,
+    //       timestamp: new Date().toISOString(),
+    //     },
+    //   ]);
 
-    if (supabaseError) {
-      console.error('Error inserting data into Supabase:', supabaseError);
-      return NextResponse.json({ message: 'Error storing data' }, { status: 500 });
-    }
+    // if (supabaseError) {
+    //   console.error('Error inserting data into Supabase:', supabaseError);
+    //   return NextResponse.json({ message: 'Error storing data' }, { status: 500 });
+    // }
 
     return NextResponse.json({ message: flaskResult }, { status: 200 });
   } catch (error) {

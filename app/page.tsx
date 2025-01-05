@@ -80,7 +80,7 @@ export default function ChatPage() {
         {
           type: 'bot',
           content:
-            'Thank you. Now, what was your total operating expenses for the same period?',
+            'Thank you.',
         },
       ]);
     }, 1000);
