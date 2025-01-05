@@ -4,14 +4,16 @@ import { supabase } from '@/lib/supabaseClient';
 import Papa from 'papaparse';
 import { UserInput, ProcessedData, FinancialData } from '@/types';
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
   try {
     const contentType = request.headers.get('Content-Type') || '';
 
-    let data: UserInput | UserInput[];
+    let data: string | UserInput | UserInput[] = '';
 
     if (contentType.includes('application/json')) {
-      data = (await request.json()) as UserInput;
+      data = (await request.json()) as string;
     } else if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
       const file = formData.get('file');
@@ -39,7 +41,7 @@ export async function POST(request: Request) {
     }
 
     // Send data to Flask endpoint
-    const flaskEndpoint = process.env.FLASK_ENDPOINT_URL as string;
+    const flaskEndpoint = "http://127.0.0.1:5000/process-input";
 
     const flaskResponse = await fetch(flaskEndpoint, {
       method: 'POST',
