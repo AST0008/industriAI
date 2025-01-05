@@ -1,2 +1,6 @@
 google.generativeai
 supabase
+flask
+python-dotenv
+pathlib
+Flask-Cors
