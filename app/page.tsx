@@ -52,13 +52,14 @@ export default function ChatPage() {
       }
 
       const result = await response.json();
+      console.log("Result from Flask:", result);
 
       // Optionally handle the result from Flask and Supabase
       setMessages((prev) => [
         ...prev,
         {
           type: 'bot',
-          content: 'Your input has been processed and stored successfully!',
+          content: result.message.response,
         },
       ]);
     } catch (error) {
@@ -67,7 +68,7 @@ export default function ChatPage() {
         ...prev,
         {
           type: 'bot',
-          content: 'There was an error processing your input. Please try again.',
+          content: 'An error occurred while processing your input. Please try again.',
         },
       ]);
     }
