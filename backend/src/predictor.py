@@ -51,13 +51,13 @@ def extract_list(user_input_raw):
     user input: Relative carbon footprint is around 56.1, Fossil Fuel Grade is A, Deforestation D, Prison Grade is C, assets worth 1 million dollars ,Military Grade is F, Tobacco is A
     Gemini output: 
 
-    Fossil Fuel Grade, A
-	Prison Grade, C
-	Deforestation Grade, D
-    Tobacco Grade, A
-    Military Weapon Grade, F
-    Relative carbon footprint, 56.1
-    Assets, 1000000
+    fossilFuel, A
+	prison, C
+	deforestation, D
+    tobacco, A
+    militaryWeapons, F
+    relativeCarbonFootprint, 56.1
+    netAssetsRate, 1000000
 
     ---
 
