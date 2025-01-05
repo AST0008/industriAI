@@ -4,3 +4,7 @@ flask
 python-dotenv
 pathlib
 Flask-Cors
+pulp
+numpy
+pandas
+scikit-learn
