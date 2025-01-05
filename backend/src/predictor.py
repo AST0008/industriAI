@@ -15,6 +15,13 @@ from predictor_function import predict, load_models
 from dotenv import load_dotenv
 from pathlib import Path
 
+from supabase import create_client, Client                                        # For database adding and pulling
+
+url: str = str(os.getenv("SUPABASE_URL")).strip()
+key: str = str(os.getenv("SUPABASE_KEY")).strip()
+
+supabase: Client = create_client(url, key)							# Supabase client created
+
 load_dotenv(dotenv_path=Path(__file__).parent / '.env')
 
 API_KEY = str(os.getenv("API_KEY")).strip()
@@ -34,13 +41,14 @@ def extract_list(user_input_raw):
     4. Tobacco Grade
     5. Military Weapon Grade
     6. Relative carbon footprint
+    7. Assets
 
     Note that you must follow this exact order always
 
     ---
     Example:
 
-    user input: Relative carbon footprint is around 56.1, Fossil Fuel Grade is A, Deforestation D, Prison Grade is C, Military Grade is F, Tobacco is A
+    user input: Relative carbon footprint is around 56.1, Fossil Fuel Grade is A, Deforestation D, Prison Grade is C, assets worth 1 million dollars ,Military Grade is F, Tobacco is A
     Gemini output: 
 
     Fossil Fuel Grade, A
@@ -49,6 +57,8 @@ def extract_list(user_input_raw):
     Tobacco Grade, A
     Military Weapon Grade, F
     Relative carbon footprint, 56.1
+    Assets, 1000000
+
     ---
 
     You must output in that exact order!
@@ -75,14 +85,21 @@ def extract_list(user_input_raw):
 				output += str(chunk.text)
 
 		values = []
+		dic = {}
 
 		try:
-			for _ in output.split('\n'):
+			for _ in output.split('\n')[:-2]:			# All except last 2
 				values.append(grade_to_numeric(_.split(',')[1].strip()))
+				dic[_.split(',')[0].strip()] = grade_to_numeric(_.split(',')[1].strip())
+		
+			for _ in output.split('\n')[-2:]:
+				values.append(float(_.split(',')[1].strip()))
+				dic[_.split(',')[0].strip()] = _.split(',')[1].strip()
+
 		except Exception as e:
 			return "enter the right grades please! (A to F)"
 
-		return values
+		return values, dic
 
 	except Exception as e:
 		print(f"Error generating response: {e}")
@@ -137,17 +154,19 @@ def predictor():
 		return jsonify({"error": "No input provided"}), 400
 
 	try:
-		extracted_list = extract_list(user_input_raw)
+		extracted_list, dic = extract_list(user_input_raw)
 
 		knn_model, scaler = load_models()
 		roi_end_of_year = predict(extracted_list, knn_model, scaler)
 
 		processed_output = wrap_it(roi_end_of_year)
 
-		return jsonify({"response": processed_output})
+		info = {'user_input': dic , 'processed_data': processed_output}
+
+		return jsonify({"response": processed_output + f"\n Data has been added to database!"})
 
 	except Exception as e:
-		
+
 		return jsonify({"response": f"Something went wrong: {e}"})
 
 if __name__ == "__main__":
