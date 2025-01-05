@@ -94,10 +94,10 @@ def extract_list(user_input_raw):
 		
 			for _ in output.split('\n')[-2:]:
 				if 'assets' in _.split(',')[0].strip().lower():
-					dic[_.split(',')[0].strip()] = _.split(',')[1].strip()
+					dic[_.split(',')[0].strip()] = float(_.split(',')[1].strip())
 				else:
 					values.append(float(_.split(',')[1].strip()))
-					dic[_.split(',')[0].strip()] = _.split(',')[1].strip()
+					dic[_.split(',')[0].strip()] = float(_.split(',')[1].strip())
 
 		except Exception as e:
 			return "enter the right grades please! (A to F)"
