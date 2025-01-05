@@ -57,6 +57,7 @@ export async function POST(request: Request) {
     }
 
     const flaskResult: ProcessedData | ProcessedData[] = await flaskResponse.json();
+    console.log('Flask result:', flaskResult);
 
     // Store data in Supabase
     const { data: supabaseData, error: supabaseError } = await supabase
@@ -75,7 +76,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Error storing data' }, { status: 500 });
     }
 
-    return NextResponse.json({ message: 'Data processed and stored successfully' }, { status: 200 });
+    return NextResponse.json({ message: flaskResult }, { status: 200 });
   } catch (error) {
     console.error('Error in API route:', error);
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });

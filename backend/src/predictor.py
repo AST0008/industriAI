@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import pickle
+
 import os
 import sys
 import requests
@@ -144,37 +144,23 @@ def wrap_it(roi_end_of_year):
 		print(f"Error generating response: {e}")
 		return 'Try again'
 
-def load_models():
-    with open('../helper/knn_model.pkl', 'rb') as model_file:
-        knn_model = pickle.load(model_file)
-
-    with open('../helper/scaler.pkl', 'rb') as scaler_file:
-        scaler = pickle.load(scaler_file)
-
-    return knn_model, scaler
-
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 @app.route('/process-input', methods=['POST'])
-def predictor(user_input_raw=None):
-	user_input_raw = request.json.get('message', None)
-	print("Request JSON:", request.json)
-	print(user_input_raw)
+def predictor():
+	user_input_raw = request.json.get('message')
+
 	if not user_input_raw:
 		return jsonify({"error": "No input provided"}), 400
 
 	try:
 		extracted_list, dic = extract_list(user_input_raw)
-		print('inside try')
+
 		# print(dic)
 		# print(extracted_list)
 
-		with open(r'C:\Users\lucky\OneDrive\Desktop\Work\IndustrAI\backend\helper\knn_model.pkl', 'rb') as model_file:
-			knn_model = pickle.load(model_file)
-		with open(r'C:\Users\lucky\OneDrive\Desktop\Work\IndustrAI\backend\helper\scaler.pkl', 'rb') as scaler_file:
-			scaler = pickle.load(scaler_file)
-		print('loaded models')
+		knn_model, scaler = load_models()
 		roi_end_of_year = predict(extracted_list, knn_model, scaler)
 
 		processed_output = wrap_it(roi_end_of_year)
@@ -189,7 +175,6 @@ def predictor(user_input_raw=None):
 
 	except Exception as e:
 		# return e
-		print(e)
 		return jsonify({"response": f"Something went wrong: {e}"})
 
 if __name__ == "__main__":

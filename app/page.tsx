@@ -59,7 +59,7 @@ export default function ChatPage() {
         ...prev,
         {
           type: 'bot',
-          content: result.message,
+          content: result.message.response,
         },
       ]);
     } catch (error) {
