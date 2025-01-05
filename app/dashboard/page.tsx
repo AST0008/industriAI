@@ -1,8 +1,9 @@
+// app/dashboard/page.tsx
+
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Bar, Pie, Line } from "react-chartjs-2";
-import { useRouter } from "next/navigation";
+import { Bar, Pie, Radar, Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,11 +12,18 @@ import {
   Title,
   Tooltip,
   Legend,
+  RadialLinearScale,
   PointElement,
   LineElement,
   ArcElement,
+  Filler,
 } from "chart.js";
+import { supabase } from "@/lib/supabaseClient";
+import { FinancialData, UserInput, ProcessedData } from "@/types";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
+// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -23,169 +31,390 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
+  RadialLinearScale,
   PointElement,
   LineElement,
-  ArcElement
+  ArcElement,
+  Filler
 );
 
-const mockData = {
-  annualRevenue: 5000000,
-  operatingExpenses: 2000000,
-  grossProfitMargin: 0.6,
-  netIncome: 1200000,
-  totalAssets: 8000000,
-  totalLiabilities: 3000000,
-  cashFlow: 1500000,
-  capitalExpenditure: 700000,
-  revenueTrend: [4000000, 4500000, 5000000, 5500000, 6000000],
-  expensesTrend: [1500000, 1800000, 2000000, 2300000, 2500000],
-};
+// Helper function to convert grades to numerical values
 
-export default function DetailedDashboard() {
+const DashboardPage: React.FC = () => {
+  const [financialData, setFinancialData] = useState<FinancialData | null>(
+    null
+  );
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleOptimizeClick = () => {
-    router.push("/optimize");
-  };
+  useEffect(() => {
+    const fetchFinancialData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from<FinancialData>("financial_data")
+          .select("*")
+          .order("timestamp", { ascending: false })
+          .limit(1);
 
+        if (error) {
+          console.error("Error fetching data from Supabase:", error);
+          setError("Failed to load data.");
+        } else {
+          setFinancialData(data[0] || null);
+          console.log(financialData);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+        setError("An unexpected error occurred.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFinancialData();
+  }, [financialData]);
+
+  if (loading) {
+    return (
+      <div className="p-6 bg-gray-100 min-h-screen flex items-center justify-center">
+        <div className="text-center text-gray-600">
+          Loading dashboard data...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 bg-gray-100 min-h-screen flex items-center justify-center">
+        <div className="text-center text-red-600">{error}</div>
+      </div>
+    );
+  }
+
+  if (!financialData) {
+    return (
+      <div className="p-6 bg-gray-100 min-h-screen">
+        <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
+          Sustainability Dashboard
+        </h1>
+        <div className="text-center text-gray-600">
+          No data available. Please input your financial data.
+        </div>
+      </div>
+    );
+  }
+
+  const { user_input, processed_data } = financialData;
+
+  // Handle both single and multiple user inputs
+  const inputs: UserInput[] = Array.isArray(user_input)
+    ? user_input
+    : [user_input];
+  const processedResults: ProcessedData[] = Array.isArray(processed_data)
+    ? processed_data
+    : [processed_data];
+
+  // For simplicity, using the first entry
+  const latestInput = inputs[0];
+  console.log("Latest Input:", latestInput);
+
+  const latestProcessed = processedResults[0];
+
+  // Prepare chart data based on latestInput
   const barData = {
-    labels: [
-      "Annual Revenue",
-      "Operating Expenses",
-      "Net Income",
-      "Total Assets",
-      "Total Liabilities",
-      "Cash Flow",
-      "Capital Expenditure",
-    ],
+    labels: ["Net Assets Rate (M USD)"],
     datasets: [
       {
-        label: "Financial Metrics (USD)",
-        data: [
-          mockData.annualRevenue,
-          mockData.operatingExpenses,
-          mockData.netIncome,
-          mockData.totalAssets,
-          mockData.totalLiabilities,
-          mockData.cashFlow,
-          mockData.capitalExpenditure,
-        ],
-        backgroundColor: [
-          "#4CAF50",
-          "#2196F3",
-          "#FFC107",
-          "#FF5722",
-          "#9C27B0",
-          "#00BCD4",
-          "#E91E63",
-        ],
+        label: "Net Assets Rate",
+        data: [latestInput.netAssetsRate],
+        backgroundColor: ["#4CAF50"],
       },
     ],
   };
 
   const pieData = {
-    labels: ["Gross Profit Margin", "Operating Expenses"],
+    labels: [
+      "Fossil Fuel Grade",
+      "Deforestation Grade",
+      "Civilian Firearms Grade",
+      "Military Weapons Grade",
+      "Tobacco Grade",
+      "Prison Grade",
+    ],
     datasets: [
       {
-        label: "Profit Distribution",
+        label: "Grades",
         data: [
-          mockData.grossProfitMargin * mockData.annualRevenue,
-          mockData.operatingExpenses,
+          latestInput.fossilFuel,
+          latestInput.deforestation,
+          latestInput.civilianFirearms,
+          latestInput.militaryWeapons,
+          latestInput.tobacco,
+          latestInput.prison,
         ],
-        backgroundColor: ["#4CAF50", "#FF5722"],
+        backgroundColor: [
+          "#4CAF50",
+          "#FF9800",
+          "#FFC107",
+          "#F44336",
+          "#9C27B0",
+          "#00BCD4",
+        ],
       },
     ],
   };
 
-  const lineData = {
-    labels: ["Year 1", "Year 2", "Year 3", "Year 4", "Year 5"],
+  const radarData = {
+    labels: [
+      "Fossil Fuel",
+      "Deforestation",
+      "Civilian Firearms",
+      "Military Weapons",
+      "Tobacco",
+      "Prison",
+    ],
     datasets: [
       {
-        label: "Revenue Trend",
-        data: mockData.revenueTrend,
-        borderColor: "#4CAF50",
-        backgroundColor: "rgba(76, 175, 80, 0.5)",
-        tension: 0.4,
-      },
-      {
-        label: "Expenses Trend",
-        data: mockData.expensesTrend,
-        borderColor: "#FF5722",
-        backgroundColor: "rgba(255, 87, 34, 0.5)",
-        tension: 0.4,
+        label: "Grades",
+        data: [
+          latestInput.fossilFuel,
+          latestInput.deforestation,
+          latestInput.civilianFirearms,
+          latestInput.militaryWeapons,
+          latestInput.tobacco,
+          latestInput.prison,
+        ],
+        backgroundColor: "rgba(33, 150, 243, 0.2)",
+        borderColor: "#2196F3",
+        borderWidth: 1,
+        pointBackgroundColor: "#2196F3",
+        fill: true,
       },
     ],
+  };
+
+  const doughnutData = {
+    labels: ["Carbon Footprint", "Remaining"],
+    datasets: [
+      {
+        data: [
+          Number(latestInput.relativeCarbonFootprint),
+          100 - Number(latestInput.relativeCarbonFootprint),
+        ],
+        backgroundColor: ["#FF6384", "#E0E0E0"],
+        hoverBackgroundColor: ["#FF6384", "#E0E0E0"],
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  const doughnutOptions = {
+    rotation: -90, // Start angle
+    circumference: 180, // Sweep angle
+    cutout: "70%", // Thickness of the doughnut
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        enabled: false,
+      },
+      title: {
+        display: true,
+        text: "Relative Carbon Footprint",
+        position: "bottom" as const,
+        font: {
+          size: 16,
+        },
+      },
+    },
+    responsive: true,
+    maintainAspectRatio: false,
   };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
-        Detailed Financial Dashboard
+        Sustainability Dashboard
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Financial Metrics Chart */}
-        <Card className="p-6 lg:col-span-2 shadow-lg">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">
-            Financial Metrics Overview
-          </h2>
-          <Bar data={barData} options={{ responsive: true }} />
-        </Card>
-
-        {/* Pie Chart */}
+        {/* Net Assets Rate Bar Chart */}
         <Card className="p-6 shadow-lg">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">
-            Profit Distribution
+            Net Assets Rate
           </h2>
-          <Pie data={pieData} options={{ responsive: true }} />
+          <Bar
+            data={barData}
+            options={{
+              indexAxis: "y" as const,
+              responsive: true,
+              plugins: {
+                legend: {
+                  display: false,
+                },
+                title: {
+                  display: true,
+                  text: "Net Assets Rate Overview",
+                },
+              },
+              scales: {
+                x: {
+                  beginAtZero: true,
+                },
+              },
+            }}
+          />
         </Card>
 
-        {/* Revenue vs. Expenses Trend */}
-        <Card className="p-6 lg:col-span-3 shadow-lg">
+        {/* Relative Carbon Footprint Doughnut Chart */}
+        <Card className="p-6 shadow-lg flex flex-col items-center justify-center">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">
-            Revenue vs. Expenses Trend
+            Relative Carbon Footprint
           </h2>
-          <Line data={lineData} options={{ responsive: true }} />
+          <div className="w-full h-48 relative">
+            <Doughnut data={doughnutData} options={doughnutOptions} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-2xl font-bold text-gray-800">
+                {latestInput.relativeCarbonFootprint}%
+              </span>
+            </div>
+          </div>
+        </Card>
+
+        {/* Environmental Grades Pie Chart */}
+        <Card className="p-6 shadow-lg">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">
+            Environmental Grades
+          </h2>
+          <Pie
+            data={pieData}
+            options={{
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: "right" as const,
+                },
+                title: {
+                  display: true,
+                  text: "Grades Distribution",
+                },
+              },
+            }}
+          />
+        </Card>
+
+        {/* Grades Overview Radar Chart */}
+        <Card className="p-6 shadow-lg lg:col-span-1">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">
+            Grades Overview
+          </h2>
+          <div className="w-full h-64">
+            <Radar
+              data={radarData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  r: {
+                    suggestedMin: 0,
+                    suggestedMax: 5,
+                    ticks: {
+                      stepSize: 1,
+                    },
+                    angleLines: {
+                      display: true,
+                    },
+                    grid: {
+                      color: "#e0e0e0",
+                    },
+                    pointLabels: {
+                      font: {
+                        size: 12,
+                      },
+                    },
+                  },
+                },
+                plugins: {
+                  legend: {
+                    display: false,
+                  },
+                  title: {
+                    display: false,
+                    text: "Grades by Category",
+                  },
+                },
+              }}
+            />
+          </div>
         </Card>
       </div>
 
-      {/* Key Insights Section */}
+      {/* Additional Insights Section */}
       <Card className="p-6 mt-8 shadow-lg">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Key Insights</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">
+          Additional Insights
+        </h2>
         <ul className="list-disc list-inside space-y-2 text-gray-600">
           <li>
-            <strong>Annual Revenue:</strong> ${mockData.annualRevenue.toLocaleString()}
+            <strong>Net Assets Rate:</strong> $
+            {latestInput.netAssetsRate.toLocaleString()}M
           </li>
           <li>
-            <strong>Operating Expenses:</strong> ${mockData.operatingExpenses.toLocaleString()}
+            <strong>Relative Carbon Footprint:</strong>{" "}
+            {latestInput.relativeCarbonFootprint}%
           </li>
           <li>
-            <strong>Net Income:</strong> ${mockData.netIncome.toLocaleString()}
-          </li>
-          <li>
-            <strong>Total Assets:</strong> ${mockData.totalAssets.toLocaleString()}
-          </li>
-          <li>
-            <strong>Total Liabilities:</strong> ${mockData.totalLiabilities.toLocaleString()}
-          </li>
-          <li>
-            <strong>Cash Flow from Operations:</strong> ${mockData.cashFlow.toLocaleString()}
-          </li>
-          <li>
-            <strong>Capital Expenditure:</strong> ${mockData.capitalExpenditure.toLocaleString()}
+            <strong>Grades:</strong>
+            <ul className="list-none pl-4">
+              <li>
+                <span className="capitalize">Fossil Fuel:</span>{" "}
+                <span className="font-semibold">{latestInput.fossilFuel}</span>
+              </li>
+              <li>
+                <span className="capitalize">Deforestation:</span>{" "}
+                <span className="font-semibold">
+                  {latestInput.deforestation}
+                </span>
+              </li>
+              <li>
+                <span className="capitalize">Civilian Firearms:</span>{" "}
+                <span className="font-semibold">
+                  {latestInput.civilianFirearms}
+                </span>
+              </li>
+              <li>
+                <span className="capitalize">Military Weapons:</span>{" "}
+                <span className="font-semibold">
+                  {latestInput.militaryWeapons}
+                </span>
+              </li>
+              <li>
+                <span className="capitalize">Tobacco:</span>{" "}
+                <span className="font-semibold">{latestInput.tobacco}</span>
+              </li>
+              <li>
+                <span className="capitalize">Prison:</span>{" "}
+                <span className="font-semibold">{latestInput.prison}</span>
+              </li>
+            </ul>
           </li>
         </ul>
       </Card>
 
-      {/* Optimize Button */}
+      {/* Action Button */}
       <div className="flex justify-center mt-8">
         <button
-          onClick={handleOptimizeClick}
+          onClick={() => router.push("/optimize")}
           className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-all"
         >
-          Optimize
+          Optimize Sustainability
         </button>
       </div>
     </div>
   );
-}
+};
+
+export default DashboardPage;

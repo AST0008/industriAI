@@ -21,9 +21,7 @@ export default function OptimizeResults() {
 
       {/* Results Summary */}
       <Card className="p-6 mb-8 shadow-md hover:shadow-lg transition-shadow duration-300">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-700">
-          Summary
-        </h2>
+        <h2 className="text-2xl font-semibold mb-4 text-gray-700">Summary</h2>
         <p className="text-lg text-gray-600">
           <strong className="text-gray-800">Total ROI:</strong>{" "}
           <span className="text-green-600 font-bold">

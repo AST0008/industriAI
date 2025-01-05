@@ -1,56 +1,148 @@
-"use client";
+// app/chat/page.tsx
+'use client';
 
-import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Send, Bot, HelpCircle, Home } from "lucide-react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Send, Bot, HelpCircle, Home } from 'lucide-react';
+import { useState, ChangeEvent, KeyboardEvent } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface Message {
-  type: "bot" | "user";
+  type: 'bot' | 'user';
   content: string;
 }
 
 const initialMessages: Message[] = [
   {
-    type: "bot",
+    type: 'bot',
     content:
       "Hello! I'll help you input your company's financial data. Let's start with your revenue. What was your total revenue for the last fiscal year?",
   },
 ];
 
-export default function Page() {
+export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
+  const [csvFile, setCsvFile] = useState<File | null>(null);
   const router = useRouter();
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
 
-    setMessages([...messages, { type: "user", content: input }]);
-    setInput("");
+    // Update chat with user message
+    setMessages([...messages, { type: 'user', content: input }]);
+    setInput('');
 
-    // Simulate bot response
+    // Prepare data to send
+    const data = { message: input };
+
+    try {
+      const response = await fetch('/api/process-input', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to process input');
+      }
+
+      const result = await response.json();
+
+      // Optionally handle the result from Flask and Supabase
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: 'bot',
+          content: 'Your input has been processed and stored successfully!',
+        },
+      ]);
+    } catch (error) {
+      console.error(error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: 'bot',
+          content: 'There was an error processing your input. Please try again.',
+        },
+      ]);
+    }
+
+    // Simulate next bot response
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
         {
-          type: "bot",
+          type: 'bot',
           content:
-            "Thank you. Now, what was your total operating expenses for the same period?",
+            'Thank you. Now, what was your total operating expenses for the same period?',
         },
       ]);
     }, 1000);
   };
 
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setCsvFile(file);
+
+    // Prepare FormData for file upload
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/process-input', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to process CSV file');
+      }
+
+      const result = await response.json();
+
+      // Update chat with confirmation
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: 'user',
+          content: `Uploaded CSV file: ${file.name}`,
+        },
+        {
+          type: 'bot',
+          content: 'Your CSV file has been processed and stored successfully!',
+        },
+      ]);
+    } catch (error) {
+      console.error(error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: 'bot',
+          content: 'There was an error processing your CSV file. Please try again.',
+        },
+      ]);
+    }
+  };
+
   const navigateToMetrics = () => {
-    router.push("/additional-metrics");
+    router.push('/additional-metrics');
   };
 
   const navigateToDashboard = () => {
-    router.push("/dashboard");
+    router.push('/dashboard');
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSend();
+    }
   };
 
   return (
@@ -79,14 +171,14 @@ export default function Page() {
                 <div
                   key={index}
                   className={`flex ${
-                    message.type === "bot" ? "justify-start" : "justify-end"
+                    message.type === 'bot' ? 'justify-start' : 'justify-end'
                   }`}
                 >
                   <div
                     className={`max-w-[80%] p-3 rounded-xl text-sm ${
-                      message.type === "bot"
-                        ? "bg-gray-100 text-gray-800"
-                        : "bg-blue-600 text-white"
+                      message.type === 'bot'
+                        ? 'bg-gray-100 text-gray-800'
+                        : 'bg-blue-600 text-white'
                     }`}
                   >
                     {message.content}
@@ -102,11 +194,23 @@ export default function Page() {
                 placeholder="Type your response..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                onKeyDown={handleKeyDown}
               />
               <Button onClick={handleSend}>
                 <Send className="w-4 h-4" />
               </Button>
+            </div>
+            {/* CSV Upload Section */}
+            <div className="mt-4">
+              <label className="flex items-center justify-center w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg shadow-md tracking-wide uppercase border border-gray-300 cursor-pointer hover:bg-gray-300">
+                <span className="mr-2">Upload CSV</span>
+                <input
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+              </label>
             </div>
           </div>
         </Card>
@@ -128,14 +232,14 @@ export default function Page() {
                   Financial Data Required:
                 </h3>
                 <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                  <li>Annual Revenue</li>
-                  <li>Operating Expenses</li>
-                  <li>Gross Profit Margin</li>
-                  <li>Net Income</li>
-                  <li>Total Assets</li>
-                  <li>Total Liabilities</li>
-                  <li>Cash Flow from Operations</li>
-                  <li>Capital Expenditure</li>
+                  <li>Net Assets Rate</li>
+                  <li>Fossil Fuel Grade</li>
+                  <li>Deforestation Grade</li>
+                  <li>Relative Carbon Footprint (1-100)</li>
+                  <li>Civilian Firearms Grade</li>
+                  <li>Military Weapons Grade</li>
+                  <li>Tobacco Grade</li>
+                  <li>Prison Grade</li>
                 </ul>
               </div>
 
@@ -144,8 +248,8 @@ export default function Page() {
                   Format Guidelines:
                 </h3>
                 <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                  <li>Use numerical values only</li>
-                  <li>Round to nearest whole number</li>
+                  <li>Use numerical values and Grades between A-E</li>
+                  <li>Round to the nearest whole number</li>
                   <li>Use USD currency</li>
                   <li>Separate thousands with commas</li>
                   <li>Example: 1,234,567</li>
@@ -158,5 +262,3 @@ export default function Page() {
     </div>
   );
 }
-
-
