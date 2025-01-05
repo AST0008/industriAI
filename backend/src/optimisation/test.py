@@ -57,6 +57,8 @@ def calculate_green_score(esg_data, weights):
 
 response = supabase.table('financial_data').select("*").order('id', desc=True).limit(n).execute().data
 
+# This will generate a green score for all the companies in the supabase table
+def generate_green_score_for_supabase_tables()
 greenScore = []
 for ind, val in enumerate(response):
     response[ind].get('user_input').pop('netAssetsRate', None)
