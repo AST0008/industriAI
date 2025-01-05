@@ -22,8 +22,6 @@ load_dotenv(dotenv_path=Path(__file__).parent.parent / '.env')
 url: str = str(os.getenv("SUPABASE_URL")).strip()
 key: str = str(os.getenv("SUPABASE_KEY")).strip()
 
-print(url)
-
 supabase: Client = create_client(url, key)							# Supabase client created
 
 API_KEY = str(os.getenv("API_KEY")).strip()
@@ -95,8 +93,11 @@ def extract_list(user_input_raw):
 				dic[_.split(',')[0].strip()] = grade_to_numeric(_.split(',')[1].strip())
 		
 			for _ in output.split('\n')[-2:]:
-				values.append(float(_.split(',')[1].strip()))
-				dic[_.split(',')[0].strip()] = _.split(',')[1].strip()
+				if 'assets' in _.split(',')[0].strip().lower():
+					dic[_.split(',')[0].strip()] = _.split(',')[1].strip()
+				else:
+					values.append(float(_.split(',')[1].strip()))
+					dic[_.split(',')[0].strip()] = _.split(',')[1].strip()
 
 		except Exception as e:
 			return "enter the right grades please! (A to F)"
@@ -143,37 +144,40 @@ def wrap_it(roi_end_of_year):
 		print(f"Error generating response: {e}")
 		return 'Try again'
 
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
-# app = Flask(__name__)
-# CORS(app)  # Enable CORS for all routes
-
-
-# @app.route('/process_input', methods=['POST'])
+@app.route('/process_input', methods=['POST'])
 def predictor(user_input_raw):
-	# user_input_raw = request.get('input')
+	user_input_raw = request.get('input')
 
-	# if not user_input:
-	# 	return jsonify({"error": "No input provided"}), 400
+	if not user_input:
+		return jsonify({"error": "No input provided"}), 400
 
 	try:
 		extracted_list, dic = extract_list(user_input_raw)
+
+		# print(dic)
+		# print(extracted_list)
 
 		knn_model, scaler = load_models()
 		roi_end_of_year = predict(extracted_list, knn_model, scaler)
 
 		processed_output = wrap_it(roi_end_of_year)
 
-		info = {'user_input': dic , 'processed_data': processed_output}
-		response = supabase.table('financial_data').insert(Info).execute()
+		print(processed_output)
+		info = {'user_input': dic, 'processed_data': processed_output, 'returns': float(roi_end_of_year)}
+		response = supabase.table('financial_data').insert(info).execute()
 
+		# print(response)
 		return jsonify({"response": processed_output + f"\n Data has been added to database!"})
-		return processed_output
+		# return processed_output
 
 	except Exception as e:
-		return "bad"
-		# return jsonify({"response": f"Something went wrong: {e}"})
+		# return e
+		return jsonify({"response": f"Something went wrong: {e}"})
 
-# if __name__ == "__main__":
-#     app.run(host="127.0.0.1", port=5000, debug=True)
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=5000, debug=True)
 
-print(predictor('Relative carbon footprint is around 56.1, Fossil Fuel Grade is A, Deforestation D, Prison Grade is C, assets worth 1 million dollars ,Military Grade is F, Tobacco is F'))
+# print(predictor('Relative carbon footprint is around 56.1, Fossil Fuel Grade is A, Deforestation D, Prison Grade is C, assets worth 1 million dollars ,Military Grade is F, Tobacco is F'))
