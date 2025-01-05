@@ -52,7 +52,7 @@ const DashboardPage: React.FC = () => {
     const fetchFinancialData = async () => {
       try {
         const { data, error } = await supabase
-          .from<FinancialData>("financial_data")
+          .from("financial_data")
           .select("*")
           .order("timestamp", { ascending: false })
           .limit(1);

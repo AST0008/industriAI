@@ -58,7 +58,7 @@ export async function POST(request: Request) {
 
     // Store data in Supabase
     const { data: supabaseData, error: supabaseError } = await supabase
-    .from<FinancialData>('financial_data')
+    .from('financial_data')
     
           .insert([
         {
