@@ -38,7 +38,7 @@ ChartJS.register(
   Filler
 );
 
-// Helper function to convert grades to numerical values
+// Helper function to convert grades to numerical
 
 const DashboardPage: React.FC = () => {
   const [financialData, setFinancialData] = useState<FinancialData | null>(
