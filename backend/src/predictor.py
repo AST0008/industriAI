@@ -17,12 +17,14 @@ from pathlib import Path
 
 from supabase import create_client, Client                                        # For database adding and pulling
 
+load_dotenv(dotenv_path=Path(__file__).parent.parent / '.env')
+
 url: str = str(os.getenv("SUPABASE_URL")).strip()
 key: str = str(os.getenv("SUPABASE_KEY")).strip()
 
-supabase: Client = create_client(url, key)							# Supabase client created
+print(url)
 
-load_dotenv(dotenv_path=Path(__file__).parent / '.env')
+supabase: Client = create_client(url, key)							# Supabase client created
 
 API_KEY = str(os.getenv("API_KEY")).strip()
 
@@ -69,7 +71,7 @@ def extract_list(user_input_raw):
 
 	try:
 		output = ''
-		response = chat_.send_message(prompt, stream=False, safety_settings={
+		response = chat.send_message(prompt, stream=False, safety_settings={
 				HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE, 
 				HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
 				HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
@@ -120,7 +122,7 @@ def wrap_it(roi_end_of_year):
 
 	try:
 		output = ''
-		response = chat_.send_message(prompt, stream=False, safety_settings={
+		response = chat.send_message(prompt, stream=False, safety_settings={
 				HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE, 
 				HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
 				HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
@@ -142,16 +144,16 @@ def wrap_it(roi_end_of_year):
 		return 'Try again'
 
 
-app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+# app = Flask(__name__)
+# CORS(app)  # Enable CORS for all routes
 
 
-@app.route('/process_input', methods=['POST'])
-def predictor():
-	user_input_raw = request.get('input')
+# @app.route('/process_input', methods=['POST'])
+def predictor(user_input_raw):
+	# user_input_raw = request.get('input')
 
-	if not user_input:
-		return jsonify({"error": "No input provided"}), 400
+	# if not user_input:
+	# 	return jsonify({"error": "No input provided"}), 400
 
 	try:
 		extracted_list, dic = extract_list(user_input_raw)
@@ -162,12 +164,16 @@ def predictor():
 		processed_output = wrap_it(roi_end_of_year)
 
 		info = {'user_input': dic , 'processed_data': processed_output}
+		response = supabase.table('financial_data').insert(Info).execute()
 
 		return jsonify({"response": processed_output + f"\n Data has been added to database!"})
+		return processed_output
 
 	except Exception as e:
+		return "bad"
+		# return jsonify({"response": f"Something went wrong: {e}"})
 
-		return jsonify({"response": f"Something went wrong: {e}"})
+# if __name__ == "__main__":
+#     app.run(host="127.0.0.1", port=5000, debug=True)
 
-if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+print(predictor('Relative carbon footprint is around 56.1, Fossil Fuel Grade is A, Deforestation D, Prison Grade is C, assets worth 1 million dollars ,Military Grade is F, Tobacco is F'))
