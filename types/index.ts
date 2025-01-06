@@ -1,6 +1,6 @@
 // types/index.ts
 export interface UserInput {
-  netAssetsRate: number | string;
+  netAssetsRate: number ;
   fossilFuel: number;
   deforestation: number;
   relativeCarbonFootprint: number | string; // 1-100
