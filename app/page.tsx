@@ -18,7 +18,7 @@ const initialMessages: Message[] = [
   {
     type: 'bot',
     content:
-      "Hello! I'll help you input your company's financial data. Let's start with your revenue. What was your total revenue for the last fiscal year?",
+      "Hello! I am IpFin, an agent determined in helping you invest in the greenest of the companies while ensuring profitability! Enter the ESG data you have on the firm.",
   },
 ];
 
