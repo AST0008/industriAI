@@ -1,4 +1,4 @@
-<div align="center"><a name="readme-top"></a>
+![image](https://github.com/user-attachments/assets/3cc4d544-9d90-4d0b-a606-8f73205a610d)<div align="center"><a name="readme-top"></a>
 
 # [IpFin](https://industri-ai-workashwajittayade-gmailcoms-projects.vercel.app/)
 
@@ -58,7 +58,29 @@ This is how we have coded the website to be like. [video link](./video.mp4)
 The backed has been hosted [here]( https://industriai.onrender.com) over at [render](https://render.com/). 
 
 - We have used [flask](https://flask.palletsprojects.com/en/stable/) in the backend as the major tech stack.
-- It performs the following x important things
+- It performs the following 5 important things
 
-1. NLP/LLM processing of unstructured data entered by the user (through the prompt bar)
+1. **NLP/LLM processing** of unstructured data entered by the user (through the prompt bar)
 2. Processing of the structured data entered by the user (through the CSV file input)
+3. Using KNN trained on a custom dataset to **predict annual returns** of a firm based on **ESG** data. The relevant code is present in [this notebook](https://github.com/AST0008/industriAI/blob/main/backend/helper/ESG_fund_performance_analysis.ipynb).
+4. Database implementation through supabase for storing ESG data for companies and displaying them on the dashboard.
+5. Using **MIP (mixed-integer programming)** to determine the _optimal investment strategy_ and the perfect porfolio given the constraints.
+
+The constraints under consideration for optimisation are 
+- [x] Institution budget
+- [x] Risk minimisation
+- [x] Favoring **greener companies**
+- [x] Ensuring optimal returns on investment
+
+We have developed [this](https://github.com/AST0008/industriAI/blob/main/backend/src/predictor.py) program to take data from supabase and optimise it for you!
+
+### The frontend
+
+The frontend has been hosted on vercel (you can click on the big **IpFin** header to get there!) and anyone can try our service out.
+
+- We have made the frontend entirely in **typescript** and **react** using javascript whenever necessary.
+- It offers a beautiful and minimalistic UI that looks sleek and cool!
+
+<img src="./image_UI.png" alt='image of UI' width=500>
+
+The code for the frontend resides [here](https://github.com/AST0008/industriAI/tree/pUrGe12-readme/app).
