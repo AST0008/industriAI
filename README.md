@@ -13,7 +13,7 @@
 
 </div>
 
-A product created in 14 hours, for the hackathon organised by Shaastra 2025.
+A product created in 14 hours, for the hackathon organised by Shaastra 2025, by team **scared to compile**.
 
 > [!IMPORTANT]
 > What can you do with IpFin?
