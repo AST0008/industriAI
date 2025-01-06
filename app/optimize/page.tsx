@@ -1,107 +1,289 @@
+// app/portfolio/page.tsx
+
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
-export default function OptimizeResults() {
-  const optimizationResults = {
-    investments: [
-      { company: "A", amount: 40000, decision: 1 },
-      { company: "B", amount: 0, decision: 0 },
-      { company: "C", amount: 30000, decision: 1 },
-      { company: "D", amount: 30000, decision: 1 },
+// Define the Holding interface
+interface Holding {
+  company: string;
+  weight: number; // Percentage
+  esgContribution: number;
+  riskContribution: number;
+  returnContribution: number;
+}
+
+// Define the PortfolioData interface
+interface PortfolioData {
+  basicComposition: {
+    totalInvested: number;
+    numberOfHoldings: number;
+    averagePositionSize: number;
+  };
+  esgProfile: {
+    portfolioEsgScore: number;
+    weightedCarbonFootprint: number;
+    greenCompaniesAllocation: number;
+  };
+  riskAndReturnMetrics: {
+    expectedPortfolioRoi: number;
+    portfolioRiskScore: number;
+    riskAdjustedReturn: number;
+  };
+  diversificationMetrics: {
+    diversificationScore: number;
+    largestPosition: number;
+    smallestPosition: number;
+  };
+  holdingsBreakdown: Holding[];
+}
+
+const PortfolioPage: React.FC = () => {
+  const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(
+    null
+  );
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Hardcoded portfolio data
+  const hardcodedData: PortfolioData = {
+    basicComposition: {
+      totalInvested: 1000000.0,
+      numberOfHoldings: 2,
+      averagePositionSize: 500000.0,
+    },
+    esgProfile: {
+      portfolioEsgScore: 0.5,
+      weightedCarbonFootprint: 30.5,
+      greenCompaniesAllocation: 60.0,
+    },
+    riskAndReturnMetrics: {
+      expectedPortfolioRoi: -3.0,
+      portfolioRiskScore: 0.4,
+      riskAdjustedReturn: -7.5,
+    },
+    diversificationMetrics: {
+      diversificationScore: 0.8,
+      largestPosition: 50.0,
+      smallestPosition: 50.0,
+    },
+    holdingsBreakdown: [
+      {
+        company: "Company_A",
+        weight: 50.0, // Percentage
+        esgContribution: 0.3,
+        riskContribution: 0.2,
+        returnContribution: -3.5,
+      },
+      {
+        company: "Company_B",
+        weight: 50.0, // Percentage
+        esgContribution: 0.2,
+        riskContribution: 0.3,
+        returnContribution: -2.5,
+      },
     ],
-    totalROI: 15400,
+  };
+
+  // Simulate data fetching
+  useEffect(() => {
+    const fetchPortfolioData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Simulate network delay
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // Set the hardcoded data
+        setPortfolioData(hardcodedData);
+      } catch (err: any) {
+        setError(err.message || "An unknown error occurred.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPortfolioData();
+  }, []);
+
+  // Handle optimization action
+  const handleOptimize = () => {
+    // For demonstration, we'll alert and reset the data
+    alert("Optimize Portfolio button clicked!");
+    // Optionally, you can reset or update the portfolio data here
+    // setPortfolioData(null);
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">
-        Optimization Results
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
+        Sustainability Dashboard
       </h1>
 
-      {/* Results Summary */}
-      <Card className="p-6 mb-8 shadow-md hover:shadow-lg transition-shadow duration-300">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-700">Summary</h2>
-        <p className="text-lg text-gray-600">
-          <strong className="text-gray-800">Total ROI:</strong>{" "}
-          <span className="text-green-600 font-bold">
-            ${optimizationResults.totalROI.toLocaleString()}
-          </span>
-        </p>
-      </Card>
+      {/* Loading State */}
+      {loading && (
+        <p className="text-center text-gray-600">Loading portfolio data...</p>
+      )}
 
-      {/* Investment Table */}
-      <Card className="p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-700">
-          Investment Breakdown
-        </h2>
-        {/* Table for larger screens */}
-        <div className="hidden md:block">
-          <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="px-6 py-3 text-left font-medium text-gray-700 border-b">
-                  Company
-                </th>
-                <th className="px-6 py-3 text-right font-medium text-gray-700 border-b">
-                  Amount Invested
-                </th>
-                <th className="px-6 py-3 text-center font-medium text-gray-700 border-b">
-                  Decision
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {optimizationResults.investments.map((investment, index) => (
-                <tr
-                  key={index}
-                  className="border-b hover:bg-gray-50 transition-colors duration-200"
-                >
-                  <td className="px-6 py-4">{investment.company}</td>
-                  <td className="px-6 py-4 text-right">
-                    ${investment.amount.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {investment.decision ? (
-                      <span className="text-green-600 font-bold">Yes</span>
-                    ) : (
-                      <span className="text-red-600 font-bold">No</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Error State */}
+      {error && <p className="text-center text-red-600">{error}</p>}
 
-        {/* Card layout for mobile screens */}
-        <div className="block md:hidden space-y-4">
-          {optimizationResults.investments.map((investment, index) => (
-            <div
-              key={index}
-              className="p-4 bg-white border border-gray-200 rounded-lg shadow-md"
-            >
-              <p className="text-lg font-medium text-gray-800">
-                <strong>Company:</strong> {investment.company}
-              </p>
-              <p className="text-lg text-gray-600">
-                <strong>Amount Invested:</strong>{" "}
-                <span className="text-gray-800">
-                  ${investment.amount.toLocaleString()}
-                </span>
-              </p>
-              <p className="text-lg">
-                <strong>Decision:</strong>{" "}
-                {investment.decision ? (
-                  <span className="text-green-600 font-bold">Yes</span>
-                ) : (
-                  <span className="text-red-600 font-bold">No</span>
+      {/* Portfolio Data */}
+      {portfolioData && (
+        <Card className="p-6 shadow-lg mb-6">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-700">
+            Portfolio Analysis Report
+          </h2>
+
+          {/* 1. Basic Portfolio Composition */}
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold mb-2">
+              1. Basic Portfolio Composition
+            </h3>
+            <ul className="list-disc list-inside space-y-1 text-gray-600">
+              <li>
+                <strong>Total Invested:</strong> $
+                {portfolioData.basicComposition.totalInvested.toLocaleString()}
+              </li>
+              <li>
+                <strong>Number of Holdings:</strong>{" "}
+                {portfolioData.basicComposition.numberOfHoldings}
+              </li>
+              <li>
+                <strong>Average Position Size:</strong> $
+                {portfolioData.basicComposition.averagePositionSize.toLocaleString()}
+              </li>
+            </ul>
+          </section>
+
+          {/* 2. ESG Profile */}
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold mb-2">2. ESG Profile</h3>
+            <ul className="list-disc list-inside space-y-1 text-gray-600">
+              <li>
+                <strong>Portfolio ESG Score:</strong>{" "}
+                {portfolioData.esgProfile.portfolioEsgScore.toFixed(3)}
+              </li>
+              <li>
+                <strong>Weighted Carbon Footprint:</strong>{" "}
+                {portfolioData.esgProfile.weightedCarbonFootprint.toFixed(2)}
+              </li>
+              <li>
+                <strong>Green Companies Allocation:</strong>{" "}
+                {portfolioData.esgProfile.greenCompaniesAllocation.toFixed(1)}%
+              </li>
+            </ul>
+          </section>
+
+          {/* 3. Risk and Return Metrics */}
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold mb-2">
+              3. Risk and Return Metrics
+            </h3>
+            <ul className="list-disc list-inside space-y-1 text-gray-600">
+              <li>
+                <strong>Expected Portfolio ROI:</strong>{" "}
+                {portfolioData.riskAndReturnMetrics.expectedPortfolioRoi.toFixed(
+                  2
                 )}
-              </p>
-            </div>
-          ))}
-        </div>
-      </Card>
+                %
+              </li>
+              <li>
+                <strong>Portfolio Risk Score:</strong>{" "}
+                {portfolioData.riskAndReturnMetrics.portfolioRiskScore.toFixed(
+                  3
+                )}
+              </li>
+              <li>
+                <strong>Risk-Adjusted Return:</strong>{" "}
+                {portfolioData.riskAndReturnMetrics.riskAdjustedReturn.toFixed(
+                  3
+                )}
+              </li>
+            </ul>
+          </section>
+
+          {/* 4. Diversification Metrics */}
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold mb-2">
+              4. Diversification Metrics
+            </h3>
+            <ul className="list-disc list-inside space-y-1 text-gray-600">
+              <li>
+                <strong>Diversification Score:</strong>{" "}
+                {portfolioData.diversificationMetrics.diversificationScore.toFixed(
+                  3
+                )}
+              </li>
+              <li>
+                <strong>Largest Position:</strong>{" "}
+                {portfolioData.diversificationMetrics.largestPosition.toFixed(
+                  1
+                )}
+                %
+              </li>
+              <li>
+                <strong>Smallest Position:</strong>{" "}
+                {portfolioData.diversificationMetrics.smallestPosition.toFixed(
+                  1
+                )}
+                %
+              </li>
+            </ul>
+          </section>
+
+          {/* 5. Holdings Breakdown */}
+          <section>
+            <h3 className="text-xl font-semibold mb-2">
+              5. Holdings Breakdown
+            </h3>
+            {portfolioData.holdingsBreakdown.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Weight (%)</TableHead>
+                    <TableHead>ESG Contribution</TableHead>
+                    <TableHead>Risk Contribution</TableHead>
+                    <TableHead>Return Contribution</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {portfolioData.holdingsBreakdown.map((holding, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{holding.company}</TableCell>
+                      <TableCell>{holding.weight.toFixed(1)}</TableCell>
+                      <TableCell>
+                        {holding.esgContribution.toFixed(3)}
+                      </TableCell>
+                      <TableCell>
+                        {holding.riskContribution.toFixed(3)}
+                      </TableCell>
+                      <TableCell>
+                        {holding.returnContribution.toFixed(3)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-gray-600">No holdings available.</p>
+            )}
+          </section>
+        </Card>
+      )}
     </div>
   );
-}
+};
+
+export default PortfolioPage;
