@@ -178,7 +178,7 @@ def predictor():
 		return jsonify({"response": f"Something went wrong: {e}"})
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Use the PORT environment variable if available
+    port = int(os.environ.get("PORT", 5000))  # Use e PORT environment variable if available
     app.run(host="0.0.0.0", port=port, debug=True)
 
 # print(predictor('Relative carbon footprint is around 56.1, Fossil Fuel Grade is A, Deforestation D, Prison Grade is C, assets worth 1 million dollars ,Military Grade is F, Tobacco is F'))
