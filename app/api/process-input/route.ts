@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     }
 
     // Send data to Flask endpoint
-    const flaskEndpoint = process.env.FLASK_ENDPOINT_URL || "http://127.0.0.1:5000/process-input";
+    const flaskEndpoint = new URL("/process-input", process.env.FLASK_ENDPOINT_URL || "http://127.0.0.1:5000");
 
     const flaskResponse = await fetch(flaskEndpoint, {
       method: 'POST',
