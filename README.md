@@ -38,9 +38,15 @@ It optimises your portfolio while also ensuring that you generate returns while 
 
 ## Workflow
 
-![image](./workflow.png)
+<img src="./workflow.png" alt="Workflow" width="500">
+
+---
 
 This is how we have coded the website to be like.
+
+[Video](./video.mp4)
+
+---
 
 ## Technical explanations
 
