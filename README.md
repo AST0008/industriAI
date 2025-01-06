@@ -42,9 +42,12 @@ It optimises your portfolio while also ensuring that you generate returns while 
 
 ---
 
-This is how we have coded the website to be like.
+This is how we have coded the website to be like. [video link](./video.mp4)
 
-[Video](./video.mp4)
+<video width="500" controls>
+  <source src="./video.mp4" type="video/mp4">
+  Browser doesn't support video tags
+</video>
 
 ---
 
