@@ -11,9 +11,15 @@
   <img src="https://img.shields.io/badge/Tool-Jupyter-informational?style=flat&logo=jupyter&color=orange" alt="Jupyter Notebook" />
 </p>
 
+#### Authors
+[ :trident: Ashwajit Tayade](https://github.com/AST0008)
+[ :octocat: Achintya Jai](https://github.com/pUrGe12)
+
 </div>
 
 A product created in 14 hours, for the hackathon organised by Shaastra 2025, by team **scared to compile**.
+
+---
 
 > [!IMPORTANT]
 > What can you do with IpFin?
@@ -38,4 +44,12 @@ This is how we have coded the website to be like.
 
 ## Technical explanations
 
-1. We have used KNN 
+### The backend
+
+The backed has been hosted [here]( https://industriai.onrender.com) over at [render](https://render.com/). 
+
+- We have used [flask](https://flask.palletsprojects.com/en/stable/) in the backend as the major tech stack.
+- It performs the following x important things
+
+1. NLP/LLM processing of unstructured data entered by the user (through the prompt bar)
+2. Processing of the structured data entered by the user (through the CSV file input)
